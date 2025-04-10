@@ -106,6 +106,11 @@ npm test
 - El sistema utiliza procesamiento asíncrono para mejor rendimiento y escalabilidad.
 
 ## Despliegue
+
+endpoints:
+-   POST - https://yfr3l1flld.execute-api.us-east-2.amazonaws.com/dev/appointments
+-   GET - https://yfr3l1flld.execute-api.us-east-2.amazonaws.com/dev/appointments/{insuredId}
+
 El despliegue se realiza utilizando el framework Serverless, que permite gestionar la infraestructura como código.
 
 ![Serverless Deploy AWS](./docs/serverless-deploy.png)
