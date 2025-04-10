@@ -1,0 +1,263 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Appointment API",
+    "version": "1.0.0",
+    "description": "API for managing medical appointments across different countries"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Default Server"
+    }
+  ],
+  "paths": {
+    "/appointments": {
+      "post": {
+        "summary": "Create a new appointment",
+        "description": "Creates a new appointment and starts the country-specific processing",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppointmentRequest"
+              },
+              "example": {
+                "insuredId": "12345",
+                "scheduleId": 678,
+                "countryISO": "PE"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Appointment created and processing started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAppointmentResponse"
+                },
+                "example": {
+                  "id": "550e8400-e29b-41d4-a716-446655440000",
+                  "status": "success",
+                  "message": "Appointment scheduling is in progress"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Bad Request",
+                  "message": "Missing required fields: insuredId, scheduleId, or countryISO"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Appointments"]
+      }
+    },
+    "/appointments/{insuredId}": {
+      "get": {
+        "summary": "Get appointments by insured ID",
+        "description": "Retrieves all appointments for a specific insured person",
+        "parameters": [
+          {
+            "name": "insuredId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the insured person (5 digits)",
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{5}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of appointments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Appointment"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "count": 2,
+                  "items": [
+                    {
+                      "id": "550e8400-e29b-41d4-a716-446655440000",
+                      "insuredId": "12345",
+                      "scheduleId": 678,
+                      "countryISO": "PE",
+                      "status": "pending",
+                      "createdAt": "2025-04-09T12:00:00Z",
+                      "updatedAt": "2025-04-09T12:00:00Z"
+                    },
+                    {
+                      "id": "550e8400-e29b-41d4-a716-446655440001",
+                      "insuredId": "12345",
+                      "scheduleId": 679,
+                      "countryISO": "CL",
+                      "status": "completed",
+                      "createdAt": "2025-04-08T10:00:00Z",
+                      "updatedAt": "2025-04-08T11:30:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid insuredId format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Bad Request",
+                  "message": "InsuredId must be a 5-digit string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Appointments"]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateAppointmentRequest": {
+        "type": "object",
+        "required": ["insuredId", "scheduleId", "countryISO"],
+        "properties": {
+          "insuredId": {
+            "type": "string",
+            "description": "ID of the insured person (5 digits)"
+          },
+          "scheduleId": {
+            "type": "integer",
+            "description": "ID of the schedule"
+          },
+          "countryISO": {
+            "type": "string",
+            "enum": ["PE", "CL"],
+            "description": "Country ISO code (PE for Peru, CL for Chile)"
+          }
+        }
+      },
+      "CreateAppointmentResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the created appointment"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status of the operation"
+          },
+          "message": {
+            "type": "string",
+            "description": "A descriptive message about the operation result"
+          }
+        }
+      },
+      "Appointment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the appointment"
+          },
+          "insuredId": {
+            "type": "string",
+            "description": "ID of the insured person"
+          },
+          "scheduleId": {
+            "type": "integer",
+            "description": "ID of the schedule"
+          },
+          "countryISO": {
+            "type": "string",
+            "description": "Country ISO code (PE for Peru, CL for Chile)"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "completed", "failed"],
+            "description": "Status of the appointment"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error type"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Appointments",
+      "description": "Operations related to appointments"
+    }
+  ]
+}
