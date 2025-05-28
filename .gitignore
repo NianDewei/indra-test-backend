@@ -1,0 +1,22 @@
+# Build and dependency files
+node_modules/
+dist/
+.serverless/
+.serverless-state/
+
+# Configuration files
+.env
+
+# Log and debug files
+logs/
+npm-debug.log
+coverage/
+
+# IDE and OS specific files
+.vscode/
+.DS_Store
+yarn.lock
+
+# mock data
+mock-appointments-data.json
+execute-demo.sh
